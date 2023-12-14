@@ -1,0 +1,96 @@
+import java.util.*;
+
+// This class implements 'StringOperator' and represents a simple replacement operation on a string.
+// It replaces the all occurrences of the specified 'oldChar' with 'newChar'.
+// The iterator of this class iterates over only one element and therefore behaves as follows:
+// The 'next' method returns 'this', if it is called for the first time.
+// 'hasNext' is 'true' only if 'next' has not been called.
+//
+public class ReplaceOperator implements StringOperator {
+
+    private char oldChar;
+    private char newChar;
+
+    // Constructor of the 'ReplaceOperator'.
+    public ReplaceOperator(char oldChar, char newChar) {
+        this.oldChar = oldChar;
+        this.newChar = newChar;
+    }
+
+    // Applies this operator to the given operand.
+    public String apply(String operand){
+        String solution = "";
+
+        for (int i = 0; i < operand.length(); i++) {
+            if(operand.charAt(i) == oldChar){
+                solution += newChar;
+            }else{
+                solution += operand.charAt(i);
+            }
+        }
+
+        return solution;
+    }
+
+    // Returns a composed operator that first applies this operator to its input, and then applies
+    // the 'after' operator to the result.
+    // Precondition: 'after' must not be 'null'.
+    public StringOperator andThen(StringOperator after){
+        return new ComposedOperator(this, (ReplaceOperator) after);
+    }
+
+    // Returns an iterator that recursively iterates over all operators
+    // of a composed operator (see class ComposedOperator) in the order of their application.
+    // The 'next' method throws a 'java.util.NoSuchElementException' if the iteration has
+    // no more operator.
+    public Iterator<StringOperator> iterator(){
+        return new Iterator<StringOperator>() {
+
+            boolean state = true;
+
+            @Override
+            public boolean hasNext() {
+                return state;
+            }
+
+            @Override
+            public StringOperator next() {
+                if(!hasNext()){
+                    throw new NoSuchElementException("no operator!");
+                }
+                state = false;
+                return new ReplaceOperator(oldChar,newChar);
+            }
+        };
+    }
+
+    // Returns 'true' if 'this' and 'o' apply the same operations in the same order.
+    public boolean equals(Object o){
+        if(this == o){
+            return true;
+        }
+        if(getClass() != o.getClass()){
+            return false;
+        }
+        ReplaceOperator obj = (ReplaceOperator) o;
+        if(obj.oldChar == oldChar && obj.newChar == newChar){
+            return true;
+        }
+        return false;
+    }
+
+    // Returns the hashCode of this object.
+    public int hashCode(){
+        return (int) (Objects.hashCode(this) * ((5-Math.sqrt(1))/2)*17*31);
+    }
+
+    // Returns a string representation with all additional parameters of the Operator.
+    // If 'this' is a composed operator the representation of the operators are separated by "and then".
+    // Examples:
+    // "replace 't' with 'T'",
+    // "replace 't' with 'T' and then replace 'x' with 'X'" .
+    // See further examples in 'PraxisApplication'.
+    public String toString(){
+        return "replace '" + oldChar + "' with '" + newChar + "'";
+    }
+}

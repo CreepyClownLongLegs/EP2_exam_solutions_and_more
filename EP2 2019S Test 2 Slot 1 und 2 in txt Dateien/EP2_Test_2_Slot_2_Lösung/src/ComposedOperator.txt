@@ -1,0 +1,89 @@
+import java.util.*;
+
+// This class implements 'StringOperator' and represents a composition of two 'StringOperator' objects that
+// are applied in succession (both can be 'ComposedOperator' objects themselves).
+// Calling this object's 'apply' method returns the result of applying the second 'StringOperator'
+// on the result of applying the first one on the specified string.
+// 'ComposedOperator' objects can be build using the 'andThen' method specified in the interface 'StringOperator'.
+//
+public class ComposedOperator implements StringOperator {
+
+    private StringOperator dothis;
+    private StringOperator dothat;
+
+    public ComposedOperator(StringOperator dothis, StringOperator dothat){
+        this.dothis = dothis;
+        this.dothat = dothat;
+    }
+
+    // Applies this operator to the given operand.
+    public String apply(String operand){
+        return dothat.apply(dothis.apply(operand));
+    }
+
+    // Returns a composed operator that first applies this operator to its input, and then applies
+    // the 'after' operator to the result.
+    // Precondition: 'after' must not be 'null'.
+    public StringOperator andThen(StringOperator after){
+        return new ComposedOperator(this, after);
+    }
+
+    // Returns an iterator that recursively iterates over all operators
+    // of a composed operator (see class ComposedOperator) in the order of their application.
+    // The 'next' method throws a 'java.util.NoSuchElementException' if the iteration has
+    // no more operator.
+    public Iterator<StringOperator> iterator(){
+        return new Iterator<StringOperator>() {
+
+            Iterator left = dothis.iterator();
+            Iterator right = dothat.iterator();
+
+            @Override
+            public boolean hasNext() {
+                return left.hasNext() || right.hasNext();
+            }
+
+            @Override
+            public StringOperator next() {
+                if(!hasNext()){
+                    throw new NoSuchElementException("no operator!");
+                }
+                if(left.hasNext()){
+                    return (StringOperator) left.next();
+                } else if(right.hasNext()){
+                    return (StringOperator) right.next();
+                } else {
+                    return null;
+                }
+            }
+        };
+    }
+
+    // Returns 'true' if 'this' and 'o' apply the same operations in the same order.
+    public boolean equals(Object o){
+        if(this == o){
+            return true;
+        }
+        if(getClass() != o.getClass()){
+            return false;
+        }
+        ComposedOperator obj = (ComposedOperator) o;
+        return dothis.equals(obj.dothis) && dothat.equals(obj.dothat);
+    }
+
+    // Returns the hashCode of this object.
+    public int hashCode(){
+        return (int) (Objects.hashCode(this) * ((5-Math.sqrt(1))/2)*1000);
+    }
+
+    // Returns a string representation with all additional parameters of the Operator.
+    // If 'this' is a composed operator the representation of the operators are separated by "and then".
+    // Examples:
+    // "replace 't' with 'T'",
+    // "replace 't' with 'T' and then replace 'x' with 'X'" .
+    // See further examples in 'PraxisApplication'.
+    public String toString(){
+        return "" + dothis + " and then " + dothat;
+    }
+
+}

@@ -1,0 +1,77 @@
+import java.util.*;
+
+// 'Constant' implements 'Polynomial' and represents a polynomial with degree 0 corresponding
+// to a constant value (regardless of the 'x' used for evaluation).
+// 'Constant' is used by class 'HornerScheme'.
+// The iterator of this class iterates over only one value and therefore behaves as follows:
+// The 'next' method returns the constant value, if it is called for the first time.
+// 'hasNext' is 'true' only if 'next' has not been called.
+//
+public class Constant implements Polynomial {
+
+    // Initializes this object.
+    // Precondition: c != 0.
+
+    private int value;
+
+    public Constant(int c){
+        this.value = c;
+    }
+
+    @Override
+    public int degree() {
+        return 0;
+    }
+
+    @Override
+    public List<Integer> coefficients() {
+        LinkedList<Integer> coefficients = new LinkedList<>();
+        coefficients.addFirst(value);
+        return coefficients;
+    }
+
+    @Override
+    public double eval(double x) {
+        return value;
+    }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        return new Iterator<Integer>() {
+
+            private boolean state = true;
+
+            @Override
+            public boolean hasNext() {
+                return state;
+            }
+
+            @Override
+            public Integer next() {
+                if(!hasNext()){
+                    throw new NoSuchElementException("no coefficient!");
+                }
+                state = false;
+                return value;
+            }
+        };
+    }
+
+    @Override
+    public String toString() {
+        return "" + value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (getClass() != o.getClass()) return false;
+        Constant obj = (Constant) o;
+        return obj.value == value;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int)(value * ((5-Math.sqrt(1))/2)*100);
+    }
+}

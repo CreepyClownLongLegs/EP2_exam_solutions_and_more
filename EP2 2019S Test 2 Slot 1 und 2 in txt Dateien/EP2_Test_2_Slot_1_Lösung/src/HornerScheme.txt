@@ -1,0 +1,97 @@
+import java.util.*;
+
+// The class implements 'Polynomial' and represents the form (a + x*p), where 'a' is an Integer
+// and 'p' is another polynomial. 'p' must not be 'null' (objects of 'Constant' shall be used to represent constants).
+// This class implements 'Polynomial' by using Horner's scheme.
+// Example:
+// a0 + a1*x + a2*x² + a3*x³ + a4*x4
+// The polynomial above is represented in Horner's scheme as:
+// a0 + x*(a1 + x*(a2 + x*(a3 + x*a4)))
+//
+public class HornerScheme implements Polynomial {
+
+    // Initializes this object.
+    // Precondition: 'p' must not be 'null'.
+
+    private int number;
+    private Polynomial expression;
+
+    public HornerScheme(int number, Polynomial expression) {
+        this.number = number;
+        this.expression = expression;
+    }
+
+    // Creates a polynomial from the coefficients specified by the array coeffs = {a0, a1, a2, ... a??}.
+    // Precondition: coeffs != null and coeffs has at least one element.
+    public static Polynomial create(int[] coeffs) {
+        Polynomial poly = new Constant(coeffs[coeffs.length-1]);
+        for (int i = coeffs.length-2; i >= 0; i--) {
+            poly = new HornerScheme(coeffs[i],poly);
+        }
+        return poly;
+    }
+
+    @Override
+    public int degree() {
+        return coefficients().size()-1;
+    }
+
+    @Override
+    public List<Integer> coefficients() {
+        LinkedList<Integer> list = new LinkedList<>();
+        Iterator listIter = this.iterator();
+        while(listIter.hasNext()){
+            list.add((int)listIter.next());
+        }
+        return list;
+    }
+
+    @Override
+    public double eval(double x) {
+        return number + x * expression.eval(x);
+    }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        return new Iterator<Integer>() {
+
+            Iterator expIter = expression.iterator();
+            boolean numberState = true;
+
+            @Override
+            public boolean hasNext() {
+                return numberState || expIter.hasNext();
+            }
+
+            @Override
+            public Integer next() {
+                if(!hasNext()){
+                    throw new NoSuchElementException("no coefficient!");
+                }
+                if(numberState){
+                    numberState = false;
+                    return number;
+                }
+                return (int)expIter.next();
+            }
+        };
+    }
+
+    @Override
+    public String toString() {
+        return "" + number + " + " + "x*(" + expression.toString() + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (getClass() != o.getClass()) return false;
+        HornerScheme obj = (HornerScheme) o;
+        return obj.number==number && expression.equals(obj.expression);
+    }
+
+    @Override
+    public int hashCode() {
+        return (int)(number * ((5-Math.sqrt(1))/2)*expression.eval(17*31));
+    }
+}
